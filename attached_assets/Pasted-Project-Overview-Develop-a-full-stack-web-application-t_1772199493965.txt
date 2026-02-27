@@ -1,0 +1,334 @@
+Project Overview
+
+Develop a full-stack web application that:
+
+Accepts single or multiple product URLs
+
+Scrapes product name and price from e-commerce pages
+
+Stores price history in database
+
+Compares current price with previously stored price
+
+Sends email notification when price drops
+
+Allows tracking for up to 1 month per user request
+
+Supports CSV upload for bulk URLs
+
+Supports multi-platform (Amazon, Flipkart, etc.)
+
+2️⃣ Core Functional Requirements
+🔐 Authentication System
+
+Login Page
+
+Register Page
+
+Session-based authentication
+
+User dashboard after login
+
+🏠 Main Dashboard Features
+
+After login, user can:
+
+Enter Single Product URL
+
+Enter Multiple URLs (dynamic input fields with "+" button)
+
+Upload CSV file with product URLs
+
+Enter email address for notifications
+
+Track products for 1-month limit
+
+View tracked products list
+
+View current price vs previous price
+
+Enable in-app notification toggle
+
+📌 UI Requirements
+
+Header with:
+
+Logo
+
+“Stores” dropdown:
+
+Amazon
+
+Flipkart
+
+Myntra
+
+Clicking opens store in new tab
+
+“Track Price” button
+
+Attractive section showing:
+
+Sample trending products from multiple platforms
+
+Product cards with image, name, price
+
+3️⃣ Backend Functional Requirements
+📥 URL Input Handling
+
+System should accept:
+
+Valid HTTPS product URLs only
+
+From supported platforms (initially):
+
+Amazon
+
+Flipkart
+
+Example formats:
+
+https://www.amazon.in/dp/B0XXXXXXX
+https://www.flipkart.com/product-name/p/itmXXXXXXXX
+🧠 Backend Processing Flow
+
+User submits URL(s)
+
+Backend validates URL
+
+Detects platform (Amazon/Flipkart)
+
+Calls appropriate scraper module
+
+Extracts:
+
+Product Name
+
+Current Price
+
+Product Image (optional)
+
+Saves data to database
+
+🗄 Database Design
+
+Tables:
+
+Users
+
+id
+
+name
+
+email
+
+password_hash
+
+created_at
+
+Products
+
+id
+
+user_id
+
+product_url
+
+product_name
+
+platform
+
+initial_price
+
+last_checked_price
+
+tracking_start_date
+
+tracking_end_date
+
+PriceHistory
+
+id
+
+product_id
+
+price
+
+checked_at
+
+🔄 Price Comparison Logic
+
+Every scheduled run:
+
+Fetch latest price
+
+Compare with last_checked_price
+
+If new_price < last_checked_price:
+
+Trigger email notification
+
+Update last_checked_price
+
+Insert into PriceHistory
+
+📅 Scheduler
+
+Use cron job / APScheduler
+
+Run every:
+
+6 hours (recommended)
+
+Only check products where:
+
+Current date < tracking_end_date
+
+4️⃣ Email Notification Logic
+
+When price drops:
+
+Email should contain:
+
+Product name
+
+Old price
+
+New price
+
+Price difference
+
+Direct product link
+
+Example:
+
+Subject: Price Drop Alert!
+
+Body:
+
+Good News!
+
+Product: iPhone 15
+Old Price: ₹75,000
+New Price: ₹72,000
+You saved: ₹3,000
+
+Buy Now: [Product Link]
+
+Use:
+
+SMTP (Gmail)
+OR
+
+SendGrid API
+
+5️⃣ Multi-URL Handling
+Option 1: Dynamic Fields
+
+Frontend:
+
+"+" button adds new URL field
+
+Option 2: CSV Upload Format
+
+CSV Example:
+
+product_url,email
+https://www.amazon.in/dp/B0XXXXXXX,user@gmail.com
+https://www.flipkart.com/p/itmXXXX,user@gmail.com
+
+Backend parses file and stores entries.
+
+6️⃣ Supported Platforms Strategy
+Phase 1:
+
+Amazon
+
+Flipkart
+
+Scraper Architecture:
+
+BaseScraper class
+
+class BaseScraper:
+    def fetch_page()
+    def extract_price()
+    def extract_title()
+
+AmazonScraper(BaseScraper)
+FlipkartScraper(BaseScraper)
+
+7️⃣ Technology Stack
+Backend
+
+Python
+
+Flask or FastAPI
+
+BeautifulSoup
+
+Requests
+
+SQLAlchemy
+
+APScheduler
+
+Frontend
+
+HTML
+
+CSS
+
+Bootstrap or Tailwind
+
+JavaScript
+
+Database
+
+SQLite (development)
+
+PostgreSQL (production)
+
+8️⃣ Advanced Features (Optional but Impressive)
+
+Track same product across Amazon & Flipkart and compare
+
+Price trend graph (Chart.js)
+
+In-app notification bell
+
+Export price history to CSV
+
+Telegram bot integration
+
+Mobile responsive UI
+
+9️⃣ Business Logic Constraints
+
+Tracking valid only for 30 days
+
+Max 20 URLs per user (prevent abuse)
+
+Validate duplicate URLs
+
+Secure scraping (random headers, user-agent rotation)
+
+🔟 Complete System Flow
+
+User registers
+
+Logs in
+
+Submits URL(s)
+
+Backend scrapes price
+
+Stores initial price
+
+Scheduler runs every few hours
+
+Price compared
+
+If dropped → Email triggered
+
+Tracking stops after 1 month
