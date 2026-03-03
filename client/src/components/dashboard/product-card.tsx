@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
 
 interface ProductCardProps {
   product: ProductWithHistory;
@@ -26,6 +27,30 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const deleteMutation = useDeleteProduct();
   const toggleMutation = useToggleProductActive();
+  const { data: forecast } = useQuery({
+    queryKey: [`/api/insights/forecast/${product.id}`],
+    queryFn: async () => {
+      const res = await fetch(`/api/insights/forecast/${product.id}`, { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+  });
+  const { data: alerts } = useQuery({
+    queryKey: [`/api/insights/alerts/${product.id}`],
+    queryFn: async () => {
+      const res = await fetch(`/api/insights/alerts/${product.id}`, { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+  });
+  const { data: compare } = useQuery({
+    queryKey: [`/api/insights/compare/${product.id}`],
+    queryFn: async () => {
+      const res = await fetch(`/api/insights/compare/${product.id}`, { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+  });
 
   // Parse numeric values from string response
   const initialPrice = Number(product.initialPrice);
@@ -142,6 +167,26 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
         </div>
+
+        {(forecast || alerts || compare) && (
+          <div className="mt-4 space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs">
+            {forecast && (
+              <p>
+                <span className="font-semibold">AI forecast:</span> {forecast.trend} trend with {(forecast.confidence * 100).toFixed(0)}% confidence.
+              </p>
+            )}
+            {compare?.comparisons?.length > 0 && (
+              <p>
+                <span className="font-semibold">Best store:</span> {compare.comparisons[0].store} at {formatCurrency(compare.comparisons[0].price)}.
+              </p>
+            )}
+            {alerts && (
+              <p className="text-muted-foreground line-clamp-2">
+                {alerts.keepaStyleAlert} {alerts.honeyCouponAlert}
+              </p>
+            )}
+          </div>
+        )}
       </CardContent>
 
       <CardFooter className="bg-muted/30 p-4 border-t border-border flex justify-between items-center">

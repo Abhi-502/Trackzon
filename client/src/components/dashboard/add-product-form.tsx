@@ -48,6 +48,13 @@ export function AddProductForm() {
     setMultipleUrls(newUrls);
   };
 
+  const storeTemplates = [
+    { label: "Amazon", url: "https://www.amazon.in/" },
+    { label: "Flipkart", url: "https://www.flipkart.com/" },
+    { label: "Myntra", url: "https://www.myntra.com/" },
+    { label: "Ajio", url: "https://www.ajio.com/" },
+  ];
+
   return (
     <Card className="shadow-md border-border/50 overflow-hidden">
       <div className="h-1.5 w-full bg-gradient-to-r from-primary via-orange-400 to-yellow-400" />
@@ -59,6 +66,20 @@ export function AddProductForm() {
         <CardDescription>
           Paste an Amazon, Flipkart, or Myntra product URL to start tracking its price.
         </CardDescription>
+        <div className="flex flex-wrap gap-2 pt-2">
+          {storeTemplates.map((store) => (
+            <Button
+              key={store.label}
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={() => setSingleUrl(store.url)}
+            >
+              {store.label}
+            </Button>
+          ))}
+        </div>
       </CardHeader>
       <CardContent className="bg-white">
         <Tabs defaultValue="single" className="w-full">

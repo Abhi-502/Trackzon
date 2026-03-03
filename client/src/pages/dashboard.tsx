@@ -6,9 +6,19 @@ import { useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PackageSearch, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useQuery } from "@tanstack/react-query";
+import { Card } from "@/components/ui/card";
 
 export default function Dashboard() {
   const { data: products, isLoading, error } = useProducts();
+  const { data: traffic } = useQuery({
+    queryKey: ["/api/analytics/traffic"],
+    queryFn: async () => {
+      const res = await fetch("/api/analytics/traffic", { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+  });
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "18rem" } as React.CSSProperties}>
@@ -27,6 +37,27 @@ export default function Dashboard() {
               <section>
                 <AddProductForm />
               </section>
+
+              {traffic && (
+                <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Tracked</p>
+                    <p className="text-2xl font-bold">{traffic.trackedProducts}</p>
+                  </Card>
+                  <Card className="p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Active</p>
+                    <p className="text-2xl font-bold">{traffic.activeTracks}</p>
+                  </Card>
+                  <Card className="p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Data Points</p>
+                    <p className="text-2xl font-bold">{traffic.totalPricePoints}</p>
+                  </Card>
+                  <Card className="p-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Storage</p>
+                    <p className="text-xl font-bold uppercase">{traffic.storage}</p>
+                  </Card>
+                </section>
+              )}
 
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
